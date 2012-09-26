@@ -1,4 +1,8 @@
-glmf-article-dbix-class-web
-===========================
+=head1 glmf-article-dbix-class-web
 
-Support material for DBIx::Class article written for GLMF
+This repository contains support material for a DBIx::Class article
+written for I<GNU/Linux magazine France> (Aka GLMF).
+
+Comments in code are written in French.
+
+=cut
