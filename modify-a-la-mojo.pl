@@ -1,64 +1,16 @@
 #!/usr/bin/env perl
 
-# auteur : Dominique Dumont <ddumont@cpan.org>
+# auteur : Dominique Dumont <ddumont at cpan.org>
 
 use 5.10.1;
 use lib 'lib';
 use Mojolicious::Lite;
 use Integ::Schema;
 use HTML::Tiny;
+use File::Slurp;
 
-# Generated automatically with HTML::FormHandler::Generator::DBIC
-# Using following commandline:
-# dbic_form_generator --rs_name=Product --schema_name=Integ::Schema --db_dsn=dbi:mysql:database=Integ
-{
-
-    package ProductForm;
-    use HTML::FormHandler::Moose;
-    extends 'HTML::FormHandler::Model::DBIC';
-    use namespace::autoclean;
-
-    use DateTime;
-
-    has '+item_class' => ( default => 'Product' );
-
-    has_field 'home_page'        => ( type   => 'TextArea', );
-    has_field 'name'             => ( type   => 'Text', size => 32, required => 1, );
-    has_field 'product_versions' => ( type   => '+ProductVersionField', );
-    has_field 'submit'           => ( widget => 'Submit', );
-
-    __PACKAGE__->meta->make_immutable;
-    no HTML::FormHandler::Moose;
-}
-
-{
-
-    package ProductVersionField;
-    use HTML::FormHandler::Moose;
-    extends 'HTML::FormHandler::Field::Compound';
-    use namespace::autoclean;
-
-    has_field 'log' => ( type => 'TextArea', required => 1, );
-    has_field 'date' => (
-        type  => 'Compound',
-        apply => [
-            {
-                transform => sub { DateTime->new( $_[0] ) },
-                message   => "Not a valid DateTime",
-            }
-        ],
-    );
-    has_field 'date.year';
-    has_field 'date.month';
-    has_field 'date.day';
-    has_field 'version' => ( type => 'Text', size => 32, required => 1, );
-    has_field 'product' => ( type => 'Select', );
-
-    __PACKAGE__->meta->make_immutable;
-    no HTML::FormHandler::Moose;
-}
-
-my $password  = 'foobar';
+my $password = read_file('.cred.txt') ;
+chomp $password;
 my $integ_dbo = 'dbi:mysql:database=Integ;host=localhost;port=3306';
 
 my $integ_schema =
@@ -70,23 +22,10 @@ my $h = HTML::Tiny->new;
 get '/' => sub {
     my $self = shift;
 
-    my $form = ProductForm->new();
-
-    $self->render(
-        template  => 'product_mod',
-        my_action => 'ok',
-        my_form   => $form
-    );
-
-};
-
-get '/alamojo/' => sub {
-    my $self = shift;
-
     $self->render( mojo_product_list => rs => $integ_schema->resultset('Product') );
 };
 
-get '/alamojo/:name/#version' => sub {
+get '/:name/#version' => sub {
     my $self = shift;
 
     # trouver la version dans la base
@@ -115,7 +54,7 @@ get '/alamojo/:name/#version' => sub {
 
 };
 
-get '/alamojo/:name' => sub {
+get '/:name' => sub {
     my $self = shift;
     $self->render(
         template => 'mojo_prod_v_list',
@@ -124,7 +63,7 @@ get '/alamojo/:name' => sub {
 
 };
 
-post '/alamojo/product_version_data_save/:vid' => sub {
+post '/product_version_data_save/:vid' => sub {
     my $self = shift;
 
     my $v_obj = $integ_schema->resultset('ProductVersion')->find( { id => $self->stash('vid') } );
@@ -161,7 +100,7 @@ __DATA__
 % while (my $product = $rs->next) {
 %   my $name = $product-> name ;
     <tr>
-        <td><a href="/alamojo/<%==$name%>"><%== $name %></td>
+        <td><a href="/<%==$name%>"><%== $name %></td>
     </tr>
 % }    
 </table>
@@ -184,7 +123,7 @@ __DATA__
 <h1>Product <%== $pv->product->name %> version <%== $pv->version %></h1>
  
 <form name="save_data" 
-      action="/alamojo/product_version_data_save/<%= $pv->id %>"
+      action="/product_version_data_save/<%= $pv->id %>"
       method="post">
 status : 
    <%== join("\n",@$radio_b) ; %>
@@ -198,5 +137,5 @@ status :
 %layout 'redirect', redirect_url => '/' ;
 <p>Product <%= $p->name %> version <%== $v %> was saved</p>
 
-<p><a href="/alamojo/">go back to product list</a></p>
+<p><a href="/">go back to product list</a></p>
 

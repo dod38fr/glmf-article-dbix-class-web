@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# auteur : Dominique Dumont <ddumont@cpan.org>
+# auteur : Dominique Dumont <ddumont at cpan.org>
 
 use 5.10.1;
 use lib 'lib';
@@ -23,7 +23,6 @@ use HTML::Tiny;
         type => 'Select', 
         widget => 'RadioGroup',
         options => [ map { { label => $_ , value => $_ } ;} qw/unstable testing stable/ ],
-        init_value => 'unstable' ,
     );
     has_field 'log' => ( type => 'Text', # or TextArea for bigger edition area
         required => 1,
@@ -44,7 +43,8 @@ use HTML::Tiny;
     no HTML::FormHandler::Moose;
 }
 
-my $password  = 'foobar';
+my $password = read_file('.cred.txt') ;
+chomp $password;
 my $integ_dbo = 'dbi:mysql:database=Integ;host=localhost;port=3306';
 
 my $integ_schema =
@@ -54,14 +54,14 @@ my $integ_schema =
 my $h = HTML::Tiny->new;
 
 # identique à la version mojo
-get '/alaformhandler/' => sub {
+get '/' => sub {
     my $self = shift;
 
     $self->render( formhandler_product_list => rs => $integ_schema->resultset('Product') );
 };
 
 # identique à la version mojo
-get '/alaformhandler/:name' => sub {
+get '/:name' => sub {
     my $self = shift;
     $self->render(
         template => 'formhandler_prod_v_list',
@@ -70,7 +70,7 @@ get '/alaformhandler/:name' => sub {
 
 };
 
-get '/alaformhandler/:name/#version' => sub {
+get '/:name/#version' => sub {
     my $self = shift;
 
     # trouver la version dans la base
@@ -81,7 +81,7 @@ get '/alaformhandler/:name/#version' => sub {
         ->find( { version => $self->stash('version') } );
 
     my $form = ProductVersionForm->new(
-        action => "/alaformhandler/product_version_data_save/".$pv->id,
+        action => "/product_version_data_save/".$pv->id,
         item => $pv, # pour afficher la valeur courante
     ) ;
 
@@ -93,7 +93,7 @@ get '/alaformhandler/:name/#version' => sub {
 
 };
 
-post '/alaformhandler/product_version_data_save/:vid' => sub {
+post '/product_version_data_save/:vid' => sub {
     my $self = shift;
 
     my $form = ProductVersionForm->new;
@@ -136,7 +136,7 @@ __DATA__
 % while (my $product = $rs->next) {
 %   my $name = $product-> name ;
     <tr>
-        <td><a href="/alaformhandler/<%==$name%>"><%== $name %></td>
+        <td><a href="/<%==$name%>"><%== $name %></td>
     </tr>
 % }    
 </table>
@@ -164,5 +164,5 @@ __DATA__
 %layout 'redirect', redirect_url => '/' ;
 <p>Product status was saved</p>
 
-<p><a href="/alaformhandler/">go back to product list</a></p>
+<p><a href="/">go back to product list</a></p>
 
