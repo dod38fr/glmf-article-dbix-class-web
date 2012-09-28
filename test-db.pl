@@ -11,9 +11,11 @@ use lib 'lib';
 use DBIx::Class;
 use Integ::Schema;
 use DateTime ;
+use File::Slurp;
 use 5.10.0;
 
-my $password  = 'foobar';
+my $password = read_file('.cred.txt') ;
+chomp $password;
 my $integ_dbo = 'dbi:mysql:database=Integ;host=localhost;port=3306';
 
 my $integ_schema =
