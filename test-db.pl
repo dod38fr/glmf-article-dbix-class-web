@@ -41,37 +41,37 @@ my $product_rs = $integ_schema->resultset('Product');
     
 }
 
-my $product_row = $product_rs->find( { name => 'OpenCourge' } );
+my $opencourge_obj = $product_rs->find( { name => 'OpenCourge' } );
 
-my $product_version_rs = $product_row->product_versions;
+my $opencourge_version_rs = $opencourge_obj->product_versions;
 
-say "Product version count ", $product_version_rs->count ;
+say "Product version count ", $opencourge_version_rs->count ;
 
-my $v = $product_version_rs->find({version => '1.02'}) ;
+my $v = $opencourge_version_rs->find({version => '1.02'}) ;
 say "version 1.02 date ", $v->date->ymd ;
 
-my $v_rs = $product_version_rs->search({date => { like => '2012%' }}) ;
+my $v_rs = $opencourge_version_rs->search({date => { like => '2012%' }}) ;
 say "version in 2012 ", $v_rs->count, " list ", join(' ', map { $_->version } $v_rs->all) ;
 
-say "Product version count before creation ", $product_version_rs->count ;
-$product_version_rs->find_or_create( { version => '1.04', } );
-say "Product version count after creation ", $product_version_rs->count ;
+say "Product version count before creation ", $opencourge_version_rs->count ;
+$opencourge_version_rs->find_or_create( { version => '1.04', } );
+say "Product version count after creation ", $opencourge_version_rs->count ;
 
-my $product_version_row =
-  $product_version_rs->find_or_create( { version => '1.04', } );
-say "Product version count after re-creation ", $product_version_rs->count ;
+my $oc_version_row_104 =
+  $opencourge_version_rs->find_or_create( { version => '1.04', } );
+say "Product version count after re-creation ", $opencourge_version_rs->count ;
 
-$product_version_row->log( "c'est mûr'" );
+$oc_version_row_104->log( "c'est mûr'" );
 
-my $d = $product_version_row->date;
-$product_version_row->date( DateTime->now ) unless $d;
+my $d = $oc_version_row_104->date;
+$oc_version_row_104->date( DateTime->now ) unless $d;
 
 # add_to_tar_balls n'est pas idempotent
-my $tarball_obj = $product_version_row->tar_balls->find_or_create(
+my $tarball_obj = $oc_version_row_104->tar_balls->find_or_create(
     { url => "http://cucurbitacée.com/repo/OpenCourge-i386.tar" } );
-$product_version_row->update;
+$oc_version_row_104->update;
 
-say "tarballs : ", $product_version_row->tar_balls->single->url ;
+say "tarballs : ", $oc_version_row_104->tar_balls->single->url ;
 
 # 1er cas de figure, le paquest n'existe pas
 $tarball_obj->add_to_packages({ name => 'concombre-1.1.el5.i386.rpm'} ) ;
@@ -97,3 +97,21 @@ my @packages = map { $_->name ; } $tarball_obj->packages->all ;
 say "package in tarball : @packages" ; 
 
 
+# construction de la jointure
+{
+    map { $_->log('blahblah'); $_->update; } $integ_schema->resultset('Package')->all ;
+    my $pkg2 = $integ_schema->resultset('Package')->find({name => $pkg_name2});
+    $pkg2 -> log ("CVE-123 and blablah") ;
+    $pkg2->update ;
+}
+
+my $cve_rs = $integ_schema->resultset('ProductVersion')->search( 
+    {
+        'package.log' => { like => '%CVE%'}
+    },
+    {
+        join => { tar_balls => { tarball_packages => 'package' }}
+    } 
+);
+
+say "CVE found in ", map { $_->product->name.' '.$_->version } $cve_rs->all ;
