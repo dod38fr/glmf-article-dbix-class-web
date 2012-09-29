@@ -1,0 +1,56 @@
+body { 
+       background-color: #E8E8E8  ;
+}
+
+h1 {  
+     color: blue ;
+     text-align: center ;
+}
+
+table { 
+    border: 2px ridge black ;
+    empty-cells: show ;
+    border-spacing: 4px ;
+    width: 100% ;
+}
+
+caption {
+    text-align: left ;
+    font-weight: bold ;
+    font-size: 120% ;
+    border-bottom: 4px solid blue ;
+    margin-bottom: 10px ;
+}
+
+// tr,td { 
+//      border: 1px solid grey ;
+// }
+
+tr:nth-child(even) {
+    background-color: white ;
+}
+
+tr.release { 
+    background-color: lightgreen ;
+}
+tr.reject { 
+    background-color: tomato ;
+}
+
+td.release { 
+    background-color: lightgreen ;
+}
+td.reject { 
+    background-color: tomato;
+}
+
+
+p.rel_date {  
+     color: blue ;
+     text-align: center ;
+}
+
+div.iso {
+          background-color: gray ;  
+          color: white;
+}
