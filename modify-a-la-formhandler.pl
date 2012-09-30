@@ -7,6 +7,7 @@ use lib 'lib';
 use Mojolicious::Lite;
 use Integ::Schema;
 use HTML::Tiny;
+use File::Slurp;
 
 # Generated automatically with HTML::FormHandler::Generator::DBIC
 # Using following commandline:
