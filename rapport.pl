@@ -11,11 +11,11 @@ use HTML::Tiny ;
 # Documentation browser under "/perldoc"
 plugin 'PODRenderer';
 
-my $integ_db = 'DBI:mysql:database=Integ;'
+my $integ_dsn = 'DBI:mysql:database=Integ;'
     . 'host=localhost;port=3306';
 
 my $schema = Integ::Schema->connect( 
-    $integ_db, 'integ_user', '',
+    $integ_dsn, 'integ_user', '',
     { RaiseError => 1 }
 );
 

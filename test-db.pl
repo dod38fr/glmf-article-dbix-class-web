@@ -16,10 +16,10 @@ use 5.10.0;
 
 my $password = read_file('.cred.txt') ;
 chomp $password;
-my $integ_dbo = 'dbi:mysql:database=Integ;host=localhost;port=3306';
+my $integ_dsn = 'dbi:mysql:database=Integ;host=localhost;port=3306';
 
 my $integ_schema =
-  Integ::Schema->connect( $integ_dbo, 'integ_mgr', $password,
+  Integ::Schema->connect( $integ_dsn, 'integ_mgr', $password,
     { RaiseError => 1, quote_names => 1 } );
 
 # remise à zéro
